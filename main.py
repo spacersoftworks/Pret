@@ -67,25 +67,25 @@ def find_place_id(shop):
     place_id = google_search_response.json()["candidates"][0]["place_id"]
     return place_id
 
-# # Scrape the Pret London Locations
-#
-# response = requests.get("https://locations.pret.co.uk/london")
-# response.raise_for_status()
-# data = response.text
-# soup = BeautifulSoup(data, "html.parser")
-# shops = soup.find_all("a", class_="Teaser-titleLink")
-# shop_names = [shop.text for shop in shops]
-# addresses = soup.find_all("div", class_="Teaser-address")
-# shop_addresses = [address.text for address in addresses]
-#
-# # Populate the database with the shop names and addresses
-# for shop, address in zip(shop_names, shop_addresses):
-#     try:
-#         new_shop = Shops(shop_name=shop, shop_address=address)
-#         db.session.add(new_shop)
-#         db.session.commit()
-#     except exc.SQLAlchemyError:
-#         db.session.rollback()
+# Scrape the Pret London Locations
+
+response = requests.get("https://locations.pret.co.uk/london")
+response.raise_for_status()
+data = response.text
+soup = BeautifulSoup(data, "html.parser")
+shops = soup.find_all("a", class_="Teaser-titleLink")
+shop_names = [shop.text for shop in shops]
+addresses = soup.find_all("div", class_="Teaser-address")
+shop_addresses = [address.text for address in addresses]
+
+# Populate the database with the shop names and addresses
+for shop, address in zip(shop_names, shop_addresses):
+    try:
+        new_shop = Shops(shop_name=shop, shop_address=address)
+        db.session.add(new_shop)
+        db.session.commit()
+    except exc.SQLAlchemyError:
+        db.session.rollback()
 
 
 @app.route("/")
