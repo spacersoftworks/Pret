@@ -171,6 +171,10 @@ def location_review(shop, address):
         return render_template("location-details.html", shop=shop, address=address, year=year, map=map_img, phone=phone_number, days=opening_times)
 
 
+# @app.route("/labor")
+# def calculate_labor():
+#     return render_template("calculator.html")
+
 @app.route("/sub", methods=["POST", "GET"])
 def newsletter_sub():
 
@@ -254,4 +258,4 @@ def send_message():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
