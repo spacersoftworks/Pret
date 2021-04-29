@@ -22,7 +22,7 @@ Bootstrap(app)
 year = datetime.now().year
 
 # Creating the shops database
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL", "sqlite:///pret_shops.db")
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///pret_shops.db"
 app.config['SECRET_KEY'] = os.environ.get("SQLALCHEMYAPPKEY")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
