@@ -13,10 +13,9 @@ import smtplib
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from functions import find_place_id, send_email
 
 GMAIL_ACCOUNT = os.environ.get("GMAIL_ACCOUNT")
-GMAIL_PASSWORD = os.environ.get("GMAIL_PASSWORD")
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 app = Flask(__name__)
 Bootstrap(app)
@@ -52,20 +51,7 @@ class Shops(db.Model):
     shop_address = db.Column(db.String(250), unique=False, nullable=False)
 
 
-# db.create_all()
-
-# Send a Search Request for Place ID to Google Maps
-def find_place_id(shop):
-    search_params = {
-        "key": GOOGLE_API_KEY,
-        "input": f"Pret {shop}",
-        "inputtype": "textquery",
-        "fields": "place_id"
-    }
-    google_search_response = requests.get("https://maps.googleapis.com/maps/api/place/findplacefromtext/json",
-                                          params=search_params)
-    place_id = google_search_response.json()["candidates"][0]["place_id"]
-    return place_id
+db.create_all()
 
 # Scrape the Pret London Locations
 
@@ -180,14 +166,11 @@ def newsletter_sub():
 
     # Send an email to subscribers
     if request.method == "POST":
-        with smtplib.SMTP("smtp.gmail.com") as connection:
-            connection.starttls()
-            connection.login(GMAIL_ACCOUNT, GMAIL_PASSWORD)
-            connection.sendmail(
-                from_addr=GMAIL_ACCOUNT,
-                to_addrs=f"{request.form['email']}",
-                msg=(f"Subject:Welcome to the Neswletter\n\nThank you for taking the time to register for our Newsletter.\n "
-                    f"We will be sending out a recap of any new features and updates to existing ones from time to time 😉.").encode("utf8"))
+        recipient = request.form["email"]
+        message = f"Subject:Welcome to the Neswletter\n\nThank you for taking the time to register for our Newsletter.\n" \
+                  f"We will be sending out a recap of any new features and updates to existing ones from time to time 😉."
+        send_email(recipient, message.encode("utf8"))
+
         return redirect(url_for("home"))
 
 
@@ -196,14 +179,10 @@ def send_message():
 
     # Send myself the message users are submitting
     if request.method == "POST":
-        with smtplib.SMTP("smtp.gmail.com") as connection:
-            connection.starttls()
-            connection.login(GMAIL_ACCOUNT, GMAIL_PASSWORD)
-            connection.sendmail(
-                from_addr=GMAIL_ACCOUNT,
-                to_addrs=GMAIL_ACCOUNT,
-                msg=(f"Subject:{request.form['subject']}\n\n{request.form['name']} sent a message:\n{request.form['message']}.\n"
-                     f"Send reply to {request.form['email']}.").encode("utf8"))
+        recipient = GMAIL_ACCOUNT
+        message = f"Subject:{request.form['subject']}\n\n{request.form['name']} sent a message:\n{request.form['message']}.\n"\
+                  f"Send reply to {request.form['email']}."
+        send_email(recipient, message.encode("utf8"))
         flash("Message Successfully Sent! Thank you!")
         return redirect(url_for("home", _anchor="footer"))
     return redirect(url_for("home"))
